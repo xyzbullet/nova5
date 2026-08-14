@@ -29,6 +29,8 @@ and general-purpose computing with Linux and Windows application compatibility.
 - `nova-os/docs/roadmap.md` — staged implementation plan
 - `nova-os/kernel/nova.conf` — FreeBSD kernel configuration overlay
 - `nova-os/compat/` — Linuxulator and Wine/Proton integration boundaries
+- `cd nova-os && make phase2-test` — host-test the Phase 2 core, NovaKit, and
+  LinuxKPI boundaries
 
 ## Architecture decisions
 

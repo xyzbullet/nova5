@@ -1,0 +1,11 @@
+[package]
+name = "novakit-virtio-net"
+version = "0.1.0"
+edition = "2021"
+license = "BSD-2-Clause"
+description = "NovaKit-native virtio-net driver scaffold"
+
+[lib]
+crate-type = ["rlib"]
+
+[dependencies]

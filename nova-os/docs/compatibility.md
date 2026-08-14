@@ -48,3 +48,17 @@ The following are compatibility risks rather than silent fallbacks:
 
 The launcher should show a clear status for each application: verified,
 community-tested, experimental, or unsupported.
+
+## Phase 2 gate status
+
+The first Phase 2 implementation records these gates in
+`tests/compatibility/README.md`. They remain **not run** until the required
+FreeBSD/Linuxulator and Wine/Proton runtimes are attached:
+
+- Static Linux ELF hello world
+- Dynamic Linux CLI application
+- Linux GUI toolkit smoke test
+- Win32 console hello world
+- Proton launch with Vulkan
+
+Passing a host Linux command is not evidence that NovaOS compatibility works.

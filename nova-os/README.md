@@ -45,14 +45,23 @@ See [`docs/architecture.md`](docs/architecture.md) for the full design and
 nova-os/
 ├── build/                 # Generated output; kept out of source control
 ├── compat/
-│   ├── linux/             # Linuxulator, runtime, packaging, and test plans
-│   └── windows/           # Wine/Proton integration and test plans
+│   ├── linuxulator/       # Linux ELF/syscall compatibility milestones
+│   ├── wine-proton/       # Wine/Proton integration milestones
+│   ├── linux/             # Existing Linux integration notes
+│   └── windows/           # Existing Windows integration notes
 ├── config/
 │   └── nova.toml.example  # Image and workstation configuration
 ├── docs/                  # Architecture, compatibility, and roadmap docs
 ├── kernel/
+│   ├── core/              # Host-testable microkernel primitives
+│   ├── bsd/               # FreeBSD personality integration boundary
+│   ├── novakit/            # Device registry and driver lifecycle
 │   ├── nova.conf          # FreeBSD kernel configuration overlay
 │   └── modules/           # Small NovaOS-specific kernel modules
+├── drivers/
+│   ├── native/            # Inherited FreeBSD driver boundary
+│   ├── linuxkpi/          # Isolated LinuxKPI boundary
+│   └── novakit-native/    # Rust NovaKit driver scaffolds
 ├── scripts/               # Host checks and build entry points
 ├── tools/
 │   └── qemu/              # Local VM boot helpers
