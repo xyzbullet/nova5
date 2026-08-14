@@ -1,0 +1,199 @@
+# NovaOS — Phase 2 Directive: Hybrid Kernel, Driver Framework & App Compatibility
+
+**Use this as a prompt/spec for whichever agent (AI or human) continues work in `nova-os/`.**
+It assumes Phase 1 is complete: FreeBSD-derived docs, Linuxulator boundary, Wine/Proton boundary,
+kernel config overlay, module starter, QEMU boot helper, roadmap, and BSD 2-Clause licensing are
+already in the repo. Nothing below should regress that work — extend it.
+
+---
+
+## 1. Mission
+
+NovaOS is a general-purpose desktop OS. The target experience:
+
+- **Windows-like** in day-to-day usability and app availability.
+- **Linux-like** in hardware support, transparency, and openness.
+- **Its own thing** underneath: a hybrid kernel, not a Linux distro and not a BSD relabel.
+
+Three properties are non-negotiable and should be treated as acceptance criteria for every later
+phase, not just aspirations:
+
+1. **Broad driver/hardware support** — a new OS's biggest real-world failure mode is a thin driver
+   catalog. This has to be solved architecturally, not by "writing more drivers eventually."
+2. **App compatibility** — Linux ELF binaries and Windows PE binaries both need to run without a VM.
+3. **Zero Windows-derived code** — no leaked/decompiled/disassembled Windows source, no NT kernel
+   binaries, no copied Windows headers. Compatibility comes only from clean-room, already-open-source
+   reimplementations (Wine/Proton and its component projects).
+
+---
+
+## 2. Constraints (do not violate)
+
+- **License boundary:** core OS stays BSD-2-Clause. Anything GPL-licensed (Linux-derived driver code,
+  some Wine-adjacent components) must be isolated as a loadable module or separate userspace process —
+  never statically linked into the BSD-licensed kernel core. Track this in a
+  `THIRDPARTY-LICENSES.md` that lists every vendored/ported component and its license. This project
+  needs a real IP/licensing review before any GPL-derived driver shim ships to users — treat the
+  isolation rules below as engineering hygiene, not a substitute for that review.
+- **No Windows IP:** no code, headers, symbols, or binary artifacts sourced from Microsoft. Windows
+  app compatibility comes exclusively from Wine/Proton-lineage projects (clean-room reimplementations
+  of the Win32 ABI from public documentation and black-box testing).
+- **No ReactOS code imports.** Reference ReactOS's *documentation and behavioral notes* if useful, but
+  do not import its source. ReactOS underwent a public 2006 source audit after concerns that some
+  contributors had prior exposure to leaked NT source — it's a well-known cautionary example of exactly
+  the contamination risk this project must avoid, not a code source.
+- **No fabricated hardware support claims.** A device is "supported" only when a driver for it actually
+  attaches and passes the compatibility matrix — not because the underlying FreeBSD/Linux ecosystem
+  supports it in general.
+
+---
+
+## 3. Architecture Directive: The Hybrid Kernel
+
+Restructure the kernel into three explicit layers. This is additive to the existing FreeBSD kernel
+config overlay, not a replacement of it — think of it as inserting a thin microkernel core underneath
+the BSD layer you already scaffolded, and formalizing the driver boundary above it.
+
+### 3.1 Microkernel core (`kernel/core/`)
+Owns only the primitives that must be trusted and small:
+- CPU scheduling (SMP-aware, priority + fair-share hybrid)
+- Thread management and context switching
+- Inter-process communication (message-passing IPC, ports/endpoints — not just pipes/sockets)
+- Virtual memory primitives (address space objects, page fault handling, physical page allocator)
+
+Everything else is pushed up a layer. Keep this core small enough to reason about formally later;
+it's the trust boundary the rest of the OS depends on.
+
+### 3.2 BSD personality layer (`kernel/bsd/`)
+Built on top of the microkernel core, this is where your existing FreeBSD-derived work lives:
+- Process/PID model, POSIX APIs, signals
+- VFS + filesystems (start with UFS/ZFS via existing FreeBSD code; ZFS is a real strength to keep)
+- Network stack (IPv4/IPv6, sockets)
+- Security policy: FreeBSD's **MAC framework** (`KAuth`-equivalent policy hooks) and **Capsicum**
+  (capability-mode sandboxing) are real, already-existing FreeBSD subsystems — wire them in rather
+  than reinventing a security model. This is a genuine differentiator vs. Windows/Linux, worth leaning
+  into for the "general purpose but more secure by default" pitch.
+- Containers-as-a-feature: FreeBSD **jails** give you Docker-equivalent isolation almost for free —
+  worth exposing as a first-class NovaOS feature later, not just an implementation detail.
+
+### 3.3 Driver framework — "NovaKit" (`kernel/novakit/`)
+An object-oriented driver framework (C++ or Rust — pick one and state the choice in
+`ARCHITECTURE.md`; Rust buys memory-safety guarantees for new drivers going forward, C keeps parity
+with the FreeBSD driver corpus you're inheriting — recommend Rust for *new* NovaKit-native drivers,
+C/C++ shim compatibility for ported ones):
+- Dynamic driver loading/unloading, hot-plug (USB, Thunderbolt, PCIe)
+- A device-tree/registry model (I/O Registry equivalent) that userland tools can query
+- Clear driver classes: storage, network, GPU, input, audio, bus controllers
+- A stable-ish driver ABI so third parties can eventually ship binary drivers without kernel source
+
+---
+
+## 4. Driver & Hardware Support Strategy ("hella driver support")
+
+This is the make-or-break subsystem. Three tiers, in priority order:
+
+**Tier 1 — Native inheritance.** Pull in the FreeBSD upstream driver tree (as your Phase 1 roadmap
+already names as the next step). This alone covers most server/storage/network hardware.
+
+**Tier 2 — LinuxKPI shim.** FreeBSD already solves the "modern GPU/WiFi driver" problem this way:
+`LinuxKPI` is a compatibility shim that lets ported Linux drivers (notably `drm-kmod` — Intel i915,
+AMD amdgpu, and modern WiFi chipset drivers) run essentially unmodified as loadable kernel modules.
+This is the realistic path to real-world laptop/desktop hardware support without hand-writing GPU
+drivers from scratch. Build/package a NovaOS equivalent of LinuxKPI + drm-kmod as an explicit Phase 2
+deliverable. **License note:** these modules stay GPL and load as separate modules per the constraint
+in §2 — never merge them into the BSD core tree.
+
+**Tier 3 — NovaKit-native going forward.** New drivers written against NovaKit directly, in the
+memory-safe language chosen in §3.3, so the driver catalog stops being 100% inherited over time.
+
+---
+
+## 5. Application Compatibility Layers
+
+### 5.1 Linux app compatibility
+Flesh out the existing Linuxulator boundary into a working syscall translation layer (this is proven
+technology — FreeBSD's Linuxulator already runs unmodified Linux ELF binaries today). Deliverables:
+- ELF loader recognizing Linux binaries and routing through the translation layer
+- Syscall coverage tracked against a real target set (start with a minimal glibc/musl static binary,
+  then a common dynamic-linked CLI tool, then a GUI toolkit like GTK, as escalating milestones)
+
+### 5.2 Windows app compatibility
+Flesh out the existing Wine/Proton boundary. Concretely:
+- Fork/vendor Wine as the Win32 API reimplementation layer (PE loader, NTDLL/Win32 API surface)
+- Pull in **DXVK** (Direct3D 9/10/11 → Vulkan), **VKD3D-Proton** (Direct3D 12 → Vulkan), and
+  **FAudio** for the gaming path — these are the actual components that make Proton work on Linux
+  today and are directly reusable here
+- Reiterate the constraint: this is a translation layer built from public API documentation and
+  black-box compatibility testing, never from Windows source or binaries
+
+---
+
+## 6. Repository Structure Additions
+
+```
+nova-os/
+├── kernel/
+│   ├── core/            # microkernel: scheduler, IPC, VM primitives
+│   ├── bsd/              # BSD personality layer (existing FreeBSD-derived work)
+│   └── novakit/           # driver framework
+├── drivers/
+│   ├── native/            # Tier 1: inherited FreeBSD drivers
+│   ├── linuxkpi/          # Tier 2: LinuxKPI shim + ported drivers (GPL, isolated)
+│   └── novakit-native/    # Tier 3: new drivers
+├── compat/
+│   ├── linuxulator/       # Linux ELF/syscall compatibility
+│   └── wine-proton/       # Windows PE/Win32 compatibility (+ dxvk, vkd3d-proton, faudio)
+├── THIRDPARTY-LICENSES.md
+└── ARCHITECTURE.md         # record the C-vs-Rust decision and layer boundaries here
+```
+
+---
+
+## 7. Phase 2 Deliverables Checklist
+
+- [ ] `ARCHITECTURE.md` documenting the three-layer hybrid kernel and language choice for NovaKit
+- [ ] Microkernel core: scheduler + IPC + VM primitives, boots to a trivial "hello from ring 0" in QEMU
+- [ ] BSD layer wired on top: PID 1 spawns, a real shell is reachable via the QEMU boot helper
+- [ ] NovaKit skeleton: one real driver (e.g., virtio-net or virtio-blk) loads dynamically end-to-end
+- [ ] LinuxKPI shim scaffolded; one drm-kmod-derived module builds against it (even if not yet loaded)
+- [ ] Linuxulator runs a statically-linked Linux ELF "hello world" to completion
+- [ ] Wine layer runs a trivial Win32 console `.exe` to completion
+- [ ] `THIRDPARTY-LICENSES.md` populated for every component touched this phase
+- [ ] Compatibility test matrix (already in repo) updated with pass/fail for each item above
+
+---
+
+## 8. Validation Gates (must pass before calling Phase 2 done)
+
+1. `make check`, `make configure`, the NovaOS diagnostic command, workspace TS checks, and `git diff`
+   validation all still pass (regression bar from Phase 1).
+2. QEMU boots the image to an interactive BSD-layer shell — not just a kernel panic-free halt.
+3. One Linux binary and one Windows binary each execute successfully through their respective
+   compatibility layers.
+4. One real hardware-class driver (virtio is fine for QEMU) attaches through NovaKit, confirmed via
+   the device registry, not just "compiles."
+
+---
+
+## 9. Roadmap (updated from Phase 1)
+
+- **Phase 2 (this directive):** hybrid kernel core, NovaKit, LinuxKPI scaffold, working Linuxulator +
+  Wine "hello world" milestones, boots to shell in QEMU.
+- **Phase 3:** FreeBSD upstream driver tree merge; drm-kmod GPU path working (basic framebuffer at
+  minimum); expand Linuxulator syscall coverage to a real GUI toolkit.
+- **Phase 4:** Desktop/userland services made real (session management, display server choice,
+  package manager); installer image build.
+- **Phase 5:** Windows compat hardening — DXVK/VKD3D-Proton/FAudio integrated, a real game or
+  productivity app as the milestone target.
+- **Phase 6:** Hardware certification pass against the compatibility matrix on real machines, not
+  just QEMU; first public alpha ISO.
+
+---
+
+## 10. Instructions for the Agent Continuing This Repo
+
+Work phase-by-phase from §7. Do not skip to Phase 3 items before Phase 2's validation gates (§8) pass.
+For every subsystem, prefer wiring in existing, proven open-source components (FreeBSD upstream,
+LinuxKPI, Wine/Proton family) over writing new implementations from scratch — the differentiator here
+is integration and packaging into one coherent hybrid-kernel OS, not reinventing driver or compat code
+that already exists and works. Update `replit.md` and the roadmap doc as each checklist item lands.
