@@ -1,6 +1,7 @@
-# [Project name]
+# NovaOS
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+FreeBSD-derived desktop operating system foundation for gaming, creative work,
+and general-purpose computing with Linux and Windows application compatibility.
 
 ## Run & Operate
 
@@ -22,15 +23,31 @@ _Replace the heading above with the project's name, and this line with one sente
 
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- `nova-os/README.md` — project scope, principles, and development commands
+- `nova-os/docs/architecture.md` — source of truth for the hybrid integration model
+- `nova-os/docs/compatibility.md` — compatibility boundaries and test matrix
+- `nova-os/docs/roadmap.md` — staged implementation plan
+- `nova-os/kernel/nova.conf` — FreeBSD kernel configuration overlay
+- `nova-os/compat/` — Linuxulator and Wine/Proton integration boundaries
 
 ## Architecture decisions
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+- NovaOS begins as a FreeBSD-derived distribution with an upstream-friendly
+  overlay, rather than copying the full FreeBSD source tree into the project.
+- The hybrid architecture combines a FreeBSD kernel base with userland
+  compatibility layers; Linux and Windows application runtimes stay out of
+  kernel mode.
+- Linux support is planned around the FreeBSD Linuxulator, and Windows support
+  around Wine/Proton, with explicit compatibility status labels.
+- The first target is amd64 UEFI, with reproducible images and rollback before
+  broad hardware certification.
 
 ## Product
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+NovaOS aims to provide a stable desktop for games, video/audio/image editing,
+development, and everyday applications. Its compatibility strategy prioritizes
+native stability, then Linux applications, Steam/Proton gaming, and Windows
+desktop software.
 
 ## User preferences
 

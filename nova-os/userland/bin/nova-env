@@ -1,0 +1,14 @@
+#!/bin/sh
+set -eu
+
+# Print the runtime locations used by NovaOS desktop services. This command is
+# intentionally read-only so it is safe to use in diagnostics and bug reports.
+
+: "${NOVA_ROOT:=/}"
+root_prefix=${NOVA_ROOT%/}
+: "${NOVA_RUNTIME_DIR:=${root_prefix}/run/nova}"
+: "${NOVA_DATA_DIR:=${root_prefix}/var/db/nova}"
+
+printf 'NOVA_ROOT=%s\n' "$NOVA_ROOT"
+printf 'NOVA_RUNTIME_DIR=%s\n' "$NOVA_RUNTIME_DIR"
+printf 'NOVA_DATA_DIR=%s\n' "$NOVA_DATA_DIR"
