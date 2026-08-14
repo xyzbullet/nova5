@@ -49,6 +49,7 @@ required_files="
   compat/linuxulator/runtime.toml
   compat/wine-proton/runtime.toml
   drivers/linuxkpi/Makefile
+  tests/compatibility/check-prerequisites.sh
 "
 
 for relative_file in $required_files; do
