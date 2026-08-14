@@ -32,7 +32,6 @@ never marks a gate as passed by running a binary directly on the host.
 
 ## Validation attempt in this development environment
 
-The current environment is a Linux host without QEMU, FreeBSD image tools,
-Wine, a NovaOS image, or a FreeBSD Linuxulator runtime. Therefore the gates are
-blocked and remain **not run**. This is an environment limitation, not a
-compatibility result.
+The FreeBSD/Linuxulator gates remain dependent on a FreeBSD-derived NovaOS
+image. The QEMU prototype shell is a separate boot milestone and does not count
+as the BSD-personality shell gate.

@@ -26,6 +26,8 @@
   not-run compatibility gates.
 - [ ] Attach the FreeBSD upstream tree and wire the core adapters.
 - [ ] Boot a BSD-layer shell in QEMU.
+- [x] Boot a Phase 2 serial-shell prototype in QEMU as an independent bring-up
+  milestone.
 - [ ] Attach a virtio driver through NovaKit during a QEMU boot.
 - [ ] Execute static Linux ELF and Win32 console hello-world binaries.
 

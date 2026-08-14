@@ -40,6 +40,11 @@ required_files="
   ARCHITECTURE.md
   THIRDPARTY-LICENSES.md
   config/nova.toml.example
+  boot/boot.asm
+  boot/kernel.c
+  boot/linker.ld
+  boot/grub.cfg
+  boot/Makefile
   docs/architecture.md
   docs/compatibility.md
   docs/roadmap.md
