@@ -7,12 +7,12 @@ not a passing result.
 
 | Gate | Status | Required runtime |
 | --- | --- | --- |
-| Static Linux ELF hello | Fixture builds on this host; NovaOS run not-run | FreeBSD Linuxulator |
+| Static Linux ELF hello | Fixture builds and runs on this dev host (musl-gcc, static); NovaOS run still not-run | FreeBSD Linuxulator |
 | Dynamic Linux CLI | Not run | Linuxulator userland |
 | GUI toolkit smoke test | Not run | Linuxulator + display stack |
-| Win32 console hello | Fixture build blocked in this host; NovaOS run not-run | Wine |
+| Win32 console hello | Fixture builds (x86_64-w64-mingw32-gcc) and runs on this dev host via host Wine 9.0; NovaOS run still not-run | Wine |
 | Proton launch | Not run | Wine/Proton + Vulkan |
-| QEMU prototype serial shell | Scripted proof available when QEMU/GRUB tools are installed | qemu-system-x86_64 + grub-mkrescue |
+| QEMU prototype serial shell | Verified in this dev environment: `make prototype-shell-test` boots the Multiboot ISO under QEMU and confirms the `nova>` shell responds to `help`/`info`/`uptime` over serial | qemu-system-x86_64 + grub-mkrescue |
 
 Run compatibility gates only from a prepared NovaOS/FreeBSD image. Do not
 substitute a host Linux execution for a NovaOS compatibility result.
@@ -71,3 +71,13 @@ never marks a gate as passed by running a binary directly on the host.
 The FreeBSD/Linuxulator gates remain dependent on a FreeBSD-derived NovaOS
 image. The QEMU prototype shell is a separate boot milestone and does not count
 as the BSD-personality shell gate.
+
+**2026-08-14, Ubuntu 24.04 sandbox:** `make check`, `make phase2-test`,
+`make prototype-image`, and `make prototype-shell-test` all pass, with a saved
+transcript at `build/qemu-shell-transcript.txt` showing the booted kernel
+answering `help`, `info`, and `uptime` at the `nova>` prompt. `make
+compat-fixtures` and `make compat-host-smoke` also pass (musl-gcc for the
+Linux fixture, x86_64-w64-mingw32-gcc + host Wine 9.0 for the Windows
+fixture). None of this substitutes for the FreeBSD/Linuxulator or Wine-inside-
+NovaOS gates above — it confirms the toolchain, the Multiboot boot path, and
+the fixture build steps are sound on a plain Linux host.
