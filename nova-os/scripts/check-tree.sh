@@ -15,6 +15,7 @@ required_dirs="
   kernel/core/include
   kernel/novakit/include
   scripts
+  sources
   drivers/native
   drivers/linuxkpi
   drivers/linuxkpi/include

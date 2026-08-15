@@ -2,7 +2,7 @@ PROJECT_ROOT!=		realpath .
 BUILD_DIR?=		${PROJECT_ROOT}/build
 CONFIG_FILE?=		${PROJECT_ROOT}/config/nova.toml.example
 
-.PHONY: help check configure phase2-test prototype-image prototype-shell prototype-shell-test compat-fixtures compat-host-smoke image clean
+.PHONY: help check configure phase2-test phase3-fetch prototype-image prototype-shell prototype-shell-test compat-fixtures compat-host-smoke image clean
 
 help:
 	@printf '%s\n' \
@@ -10,6 +10,7 @@ help:
 		'  make check      Validate the repository skeleton and required tools' \
 		'  make configure  Generate a local build manifest' \
 		'  make phase2-test Run the host-testable kernel and NovaKit checks' \
+		'  make phase3-fetch Clone Phase 3.1 upstream source checkouts into build/upstream' \
 		'  make prototype-image Build the QEMU Phase 2 prototype ISO' \
 		'  make prototype-shell Boot the prototype into its serial shell' \
 		'  make prototype-shell-test Script and verify the QEMU serial shell' \
@@ -28,6 +29,9 @@ phase2-test: check
 	@${MAKE} -C kernel/core test
 	@${MAKE} -C kernel/novakit test
 	@${MAKE} -C drivers/linuxkpi test
+
+phase3-fetch: check
+	@sh ./scripts/fetch-upstreams.sh
 
 prototype-image: check
 	@${MAKE} -C boot image
