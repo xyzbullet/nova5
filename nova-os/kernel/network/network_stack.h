@@ -11,6 +11,12 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#include <sys/types.h>
+
+#ifndef __socklen_t_defined
+#define __socklen_t_defined
+typedef unsigned int socklen_t;
+#endif
 
 /* Address families */
 enum nova_af {
@@ -243,6 +249,8 @@ int nova_close(int sockfd);
 int nova_netdev_register(struct nova_net_device *dev);
 int nova_netdev_unregister(struct nova_net_device *dev);
 struct nova_net_device *nova_netdev_find(const char *name);
+int nova_loopback_init(void);
+int nova_nic_stub_init(void);
 
 /* Packet buffer management */
 struct nova_sk_buff *nova_alloc_skb(size_t size);

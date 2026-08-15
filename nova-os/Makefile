@@ -27,6 +27,7 @@ configure: check
 
 phase2-test: check
 	@${MAKE} -C kernel/core test
+	@${MAKE} -C kernel/network test
 	@${MAKE} -C kernel/novakit test
 	@${MAKE} -C drivers/linuxkpi test
 

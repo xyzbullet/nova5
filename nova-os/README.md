@@ -67,6 +67,7 @@ nova-os/
 │   └── qemu/              # Local VM boot helpers
 └── userland/
     ├── services/          # Long-running NovaOS desktop services
+    ├── uimode/            # UI mode boot planning and desktop startup contract
     └── bin/               # User-facing command wrappers
 ```
 

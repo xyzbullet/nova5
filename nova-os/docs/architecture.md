@@ -72,6 +72,14 @@ The default desktop stack is intended to be Wayland-first:
 - A compositor provides the interactive shell and game-friendly presentation.
 - Portals and sandbox policies mediate file, screen, and device access.
 
+For the UI boot path specifically, the serial kernel shell stays available as a
+recovery console and a one-way handoff to a userland session manager. The
+handoff should not embed desktop logic in the kernel; instead the kernel exposes a
+minimal command contract such as `ui desktop`, `ui compat`, or `ui text`, and
+userland `nova-sessiond` decides which service tree to start. The prototype
+interface is documented in `userland/uimode/README.md` and implemented in
+`userland/uimode/desktop/ui_boot_path.[ch]`.
+
 The initial implementation can consume existing mature components. NovaOS
 should only fork a component when its behavior is a product-defining need.
 
