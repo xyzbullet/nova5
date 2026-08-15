@@ -52,8 +52,11 @@ community-tested, experimental, or unsupported.
 ## Phase 2 gate status
 
 The first Phase 2 implementation records these gates in
-`tests/compatibility/README.md`. They remain **not run** until the required
-FreeBSD/Linuxulator and Wine/Proton runtimes are attached:
+`tests/compatibility/README.md`. Tiny Linux ELF and Windows PE hello-world
+fixtures now live under `tests/compatibility/fixtures/` and can be generated
+with `make compat-fixtures`, but generated host fixtures are only inputs to the
+real NovaOS gates. They remain **not run** until the required FreeBSD/
+Linuxulator and Wine/Proton runtimes are attached:
 
 - Static Linux ELF hello world
 - Dynamic Linux CLI application
@@ -61,4 +64,5 @@ FreeBSD/Linuxulator and Wine/Proton runtimes are attached:
 - Win32 console hello world
 - Proton launch with Vulkan
 
-Passing a host Linux command is not evidence that NovaOS compatibility works.
+Passing a host Linux command or host Wine command is not evidence that NovaOS
+compatibility works.

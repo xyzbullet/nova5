@@ -2,7 +2,7 @@ PROJECT_ROOT!=		realpath .
 BUILD_DIR?=		${PROJECT_ROOT}/build
 CONFIG_FILE?=		${PROJECT_ROOT}/config/nova.toml.example
 
-.PHONY: help check configure phase2-test prototype-image prototype-shell image clean
+.PHONY: help check configure phase2-test prototype-image prototype-shell prototype-shell-test compat-fixtures compat-host-smoke image clean
 
 help:
 	@printf '%s\n' \
@@ -12,6 +12,9 @@ help:
 		'  make phase2-test Run the host-testable kernel and NovaKit checks' \
 		'  make prototype-image Build the QEMU Phase 2 prototype ISO' \
 		'  make prototype-shell Boot the prototype into its serial shell' \
+		'  make prototype-shell-test Script and verify the QEMU serial shell' \
+		'  make compat-fixtures Build Linux ELF and Windows PE hello fixtures' \
+		'  make compat-host-smoke Host-smoke the hello fixtures without recording NovaOS pass' \
 		'  make image      Build a bootable image (requires FreeBSD image tools)' \
 		'  make clean      Remove generated build output'
 
@@ -39,6 +42,15 @@ prototype-shell: prototype-image
 		-monitor none \
 		-no-reboot \
 		-no-shutdown
+
+prototype-shell-test: prototype-image
+	@sh ./tools/qemu/scripted-shell.sh "${BUILD_DIR}/novaos-prototype.iso"
+
+compat-fixtures: check
+	@sh ./tests/compatibility/build-hello-fixtures.sh "${BUILD_DIR}/compat"
+
+compat-host-smoke: compat-fixtures
+	@sh ./tests/compatibility/run-host-smoke.sh "${BUILD_DIR}/compat"
 
 image: configure
 	@sh ./scripts/build-image.sh "${BUILD_DIR}"
