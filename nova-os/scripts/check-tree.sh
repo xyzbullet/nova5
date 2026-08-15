@@ -55,6 +55,13 @@ required_files="
   compat/wine-proton/runtime.toml
   drivers/linuxkpi/Makefile
   tests/compatibility/check-prerequisites.sh
+  tests/compatibility/build-hello-fixtures.sh
+  tests/compatibility/build-linux-fixture.sh
+  tests/compatibility/build-windows-fixture.sh
+  tests/compatibility/run-host-smoke.sh
+  tests/compatibility/fixtures/linux-hello.c
+  tests/compatibility/fixtures/windows-hello.c
+  tools/qemu/scripted-shell.sh
 "
 
 for relative_file in $required_files; do
