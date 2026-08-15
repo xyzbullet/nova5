@@ -6,6 +6,10 @@ iso=${1:-"$root/build/novaos-prototype.iso"}
 transcript=${NOVA_QEMU_TRANSCRIPT:-"$root/build/qemu-shell-transcript.txt"}
 commands=${NOVA_QEMU_COMMANDS:-'help
 info
+uname
+ps
+syscalls
+posix
 uptime
 '}
 
@@ -45,11 +49,13 @@ case "$status" in
 esac
 
 for expected in \
-	'NovaOS Phase 2 prototype booted.' \
+	'NovaOS Phase 3.1 Rapid Kernel booted.' \
 	'nova> help' \
-	'commands: help, info, clear, uptime' \
-	'NovaOS Phase 2 prototype' \
-	'uptime: running under QEMU'
+	'commands: help, info, uname, ps, echo, syscalls, devices, posix, clear, uptime' \
+	'NovaOS Phase 3.1 Rapid Kernel prototype' \
+	'NovaOS qemu0 3.1.0-prototype' \
+	'implemented syscall ABI: write, uname, getpid, uptime' \
+	'uptime ticks:'
 do
 	if ! grep -F "$expected" "$transcript" >/dev/null 2>&1; then
 		printf 'failed: transcript missing expected text: %s\n' "$expected" >&2

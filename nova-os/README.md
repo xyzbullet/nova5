@@ -110,3 +110,27 @@ The FreeBSD-derived portions must preserve their original BSD license notices.
 New NovaOS code should use the 2-clause BSD license unless a component's
 upstream license requires another compatible license. See
 [`LICENSE`](LICENSE) and retain notices when importing code.
+## Phase 3.1 prototype shell
+
+The Phase 3.1 Rapid Kernel target boots a freestanding Multiboot kernel in QEMU
+and exposes a serial command line.  It is not a full POSIX-certified system yet,
+but shell commands now call through a small kernel syscall dispatcher (`write`,
+`uname`, `getpid`, and `uptime`) so the prototype has an explicit ABI boundary
+for the upcoming BSD personality work.
+
+```sh
+cd nova-os
+make prototype-shell-test
+```
+
+Upstream source checkouts are intentionally kept out of the repository.  To pull
+the actual sources for the BSD/POSIX personality, driver inheritance, and clean
+compatibility runtimes, run:
+
+```sh
+cd nova-os
+make phase3-fetch
+```
+
+This clones the repositories listed in `sources/phase3.1.toml` into
+`build/upstream/` with shallow checkouts.

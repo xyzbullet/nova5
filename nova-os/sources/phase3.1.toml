@@ -1,0 +1,43 @@
+# Phase 3.1 upstream source plan.  The fetch script clones these repositories
+# into build/upstream instead of vendoring incompatible licenses into the tree.
+[[repo]]
+name = "freebsd-src"
+url = "https://git.FreeBSD.org/src.git"
+branch = "main"
+license = "BSD family"
+purpose = "BSD/POSIX personality, VFS, networking, jails, Capsicum, native drivers"
+
+[[repo]]
+name = "freebsd-ports"
+url = "https://git.FreeBSD.org/ports.git"
+branch = "main"
+license = "mixed package metadata"
+purpose = "drm-kmod, LinuxKPI packaging references, Wine/Proton dependencies"
+
+[[repo]]
+name = "wine"
+url = "https://gitlab.winehq.org/wine/wine.git"
+branch = "master"
+license = "LGPL-2.1-or-later"
+purpose = "clean-room Win32/PE compatibility layer"
+
+[[repo]]
+name = "dxvk"
+url = "https://github.com/doitsujin/dxvk.git"
+branch = "master"
+license = "zlib/libpng"
+purpose = "Direct3D 9/10/11 to Vulkan runtime"
+
+[[repo]]
+name = "vkd3d-proton"
+url = "https://github.com/HansKristian-Work/vkd3d-proton.git"
+branch = "master"
+license = "LGPL-2.1-or-later"
+purpose = "Direct3D 12 to Vulkan runtime"
+
+[[repo]]
+name = "faudio"
+url = "https://github.com/FNA-XNA/FAudio.git"
+branch = "master"
+license = "zlib"
+purpose = "XAudio-compatible audio runtime for Wine/Proton"

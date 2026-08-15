@@ -59,3 +59,18 @@ runtime or boot validation gates have passed.
 An initial release is ready only when it can install, boot, update, roll back,
 play a verified game, run a verified Linux application, and complete a verified
 creative workflow on documented hardware.
+## Phase 3.1: Rapid Kernel command-line bring-up
+
+- [x] Promote the QEMU prototype banner and shell to Phase 3.1.
+- [x] Add a minimal in-kernel syscall dispatcher for `write`, `uname`,
+  `getpid`, and `uptime` so shell commands exercise a kernel ABI boundary
+  instead of writing directly to the UART.
+- [x] Add basic command-line tools: `help`, `info`, `uname`, `ps`, `echo`,
+  `syscalls`, `devices`, `posix`, `clear`, and `uptime`.
+- [x] Record upstream source repositories in `sources/phase3.1.toml` and add
+  `make phase3-fetch` to clone shallow checkouts into `build/upstream` without
+  vendoring mixed-license code into the BSD core.
+- [ ] Replace the in-kernel shell with BSD PID 1 plus a userland shell once the
+  FreeBSD source checkout is attached.
+- [ ] Expand the syscall ABI to real POSIX process and VFS calls through the BSD
+  personality (`open`, `read`, `close`, `fork`, `exec`, `wait`, `stat`).
